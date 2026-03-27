@@ -68,19 +68,68 @@ def get_weather(city):
     except requests.exceptions.ConnectionError:
         print("\n❌ No internet connection. Please check your network.")
 
+def get_forecast(city):
+    url = f"http://api.openweathermap.org/data/2.5/forecast?q={city}&appid={API_KEY}&units=metric"
+    
+    try:
+        response = requests.get(url)
+        data = response.json()
+
+        if data["cod"] != "200":
+            print(f"\n❌ Error: {data['message']}")
+            return
+
+        print("\n" + "=" * 40)
+        print(f"  📅  5-Day Forecast for {city.title()}")
+        print("=" * 40)
+
+        # API gives forecast every 3 hours
+        # We pick one reading per day (every 8th item = 24 hours)
+        seen_dates = []
+        for item in data["list"]:
+            date = item["dt_txt"].split(" ")[0]
+            
+            # Only show one reading per day
+            if date not in seen_dates:
+                seen_dates.append(date)
+                temp = item["main"]["temp"]
+                description = item["weather"][0]["description"]
+                emoji = get_weather_emoji(description)
+                feel = get_temp_feel(temp)
+                
+                print(f"  {emoji} {date} | {temp}°C ({feel})")
+                print(f"      condition: {description.title()}")
+                print("-" * 40)
+
+    except requests.exceptions.ConnectionError:
+        print("\n❌ No internet connection.")
+
 print("🌤️  Welcome to Weather App!")
-print("Type a city name to get weather or 'quit' to exit\n")
+print("=" * 40)
 
 while True:
-    city = input("Enter city name: ")
+    print("\nWhat would you like to do?")
+    print("  1️⃣  Current Weather")
+    print("  2️⃣  5-Day Forecast")
+    print("  3️⃣  Quit")
+    print("-" * 40)
     
-    if city.lower() == "quit":
+    choice = input("Enter choice (1/2/3): ").strip()
+
+    if choice == "3":
         print("\n👋 Goodbye!")
         break
-    
-    if city.strip() == "":
+    elif choice not in ["1", "2"]:
+        print("❌ Invalid choice! Please enter 1, 2 or 3.")
+        continue
+
+    city = input("Enter city name: ").strip()
+
+    if city == "":
         print("❌ Please enter a city name!")
         continue
-    
-    get_weather(city)
-    print()
+
+    if choice == "1":
+        get_weather(city)
+    elif choice == "2":
+        get_forecast(city)
