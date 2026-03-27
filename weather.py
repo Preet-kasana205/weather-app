@@ -34,5 +34,19 @@ def get_weather(city):
     except requests.exceptions.ConnectionError:
         print("\n❌ No internet connection. Please check your network.")
 
-city = input("Enter city name: ")
-get_weather(city)
+print("🌤️  Welcome to Weather App!")
+print("Type a city name to get weather or 'quit' to exit\n")
+
+while True:
+    city = input("Enter city name: ")
+    
+    if city.lower() == "quit":
+        print("\n👋 Goodbye!")
+        break
+    
+    if city.strip() == "":
+        print("❌ Please enter a city name!")
+        continue
+    
+    get_weather(city)
+    print()
